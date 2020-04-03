@@ -16,13 +16,18 @@ if patent == '':
     exit()
 else:
     url = 'https://patents.google.com/patent/' + patent
-    print("Lookin up " + url)
+    print("Looking up " + url)
     try:
         PatentPage = requests.get(url)
         PatentSoup = BeautifulSoup(PatentPage.content, 'lxml')
     except:
         print("Patent" + patent + " not found.")
         exit()
+    EncFind = PatentSoup.find_all("meta") # .get("charset")
+    for i in EncFind:
+        if i.get("charset") != None:
+            enc = i.get("charset")
+            break
     title = PatentSoup.find("meta", {"name":"DC.title"}).get("content")
     ## alternative:
     # title = PatentSoup.find("span", {"itemprop": "title"}).get_text(strip=True)
@@ -43,7 +48,9 @@ else:
     # df = pandas.DataFrame(ClaimsCSV)
     # df.to_csv("patents.csv", index=False, header=False)
     # get all claims
-    claims = PatentSoup.find_all("div",{"class":"claims"})
+    claims = PatentSoup.find("section",{"itemprop":"claims"})
+    with open(str(patent) + "-claims.html", "w", encoding=enc) as html_file:
+        html_file.write(str(claims))
     #
     try:
         PicturesAll = PatentSoup.find_all("li",{"itemprop":"images"})
@@ -54,7 +61,7 @@ else:
         print(err)
     except HTTPError as err:
         print(err)
-    print(title)
-    print(claims)
-    print(PicturesAll)
-    print(PicturesURLs)
+    #
+    description = PatentSoup.find("section",{"itemprop":"description"})
+    with open(str(patent) + "-description.html", "w", encoding=enc) as html_file:
+        html_file.write(str(description))
