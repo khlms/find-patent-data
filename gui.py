@@ -5,6 +5,7 @@ from tkinter import ttk
 from PIL import ImageTk,Image  # to be able to show png, jpg, for python3: pip install pillow
 
 root = Tk()
+root.title("Patent Tool")
 
 content = ttk.Frame(root)
 # template: content
