@@ -8,4 +8,5 @@ import tkinter
 
 html in tkinter anzeigen:
 in Kommandozeile:
-pip3 install tkinterhtml
+pip install image
+pip install tkhtmlview
