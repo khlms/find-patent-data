@@ -11,12 +11,13 @@ class GUIBescheid:
         # make root widget
         root = Tk()
 
-        # maximize window TODO
+        # maximize window
+        #TODO: maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
 
         # make title
-        root.title("Patent Tool")
+        root.title("Patent Tool") #TODO:better title
 
         #############################
         # make menu
@@ -27,14 +28,14 @@ class GUIBescheid:
 
         menu = Menu(root)
         root.config(menu=menu)
-        filemenu = Menu(menu)
+        filemenu = Menu(menu,tearoff=0)
         menu.add_cascade(label="Stand der Technik", menu=filemenu)
         filemenu.add_command(label="Hinzufügen", command=AddPriorArt)
         filemenu.add_separator()
-        filemenu.add_command(label="Exit", command=root.quit)
-        helpmenu = Menu(menu)
-        menu.add_cascade(label="Help", menu=helpmenu)
-        helpmenu.add_command(label="About...", command=About)
+        filemenu.add_command(label="Beenden", command=root.quit)
+        helpmenu = Menu(menu,tearoff=0)
+        menu.add_cascade(label="Hilfe", menu=helpmenu)
+        helpmenu.add_command(label="Über...", command=About)
         #############################
 
         # make content frame
