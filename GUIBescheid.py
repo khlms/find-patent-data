@@ -8,8 +8,7 @@ from PIL import ImageTk,Image  # to be able to show png, jpg, for python3: pip i
 
 class GUIBescheid:
     def __init__(self):
-        # make root widget
-        root = Tk()
+
 
         # maximize window
         #TODO: maximize
@@ -43,11 +42,8 @@ class GUIBescheid:
 
         #############################
         # make application part (left side)
-        img=Image.open("sample-picture.png")
-        img=img.resize((500,300),Image.ANTIALIAS)
-        img=ImageTk.PhotoImage(img)
-
-        ApplFig = ttk.Label(content, image = img)
+        # Appl: insert figure(s)
+        self.OpenImage(content,"sample-picture.png")
         ApplDesc = HTMLScrolledText(content, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
         #############################
 
@@ -61,9 +57,10 @@ class GUIBescheid:
         TabControlPA.add(tabD1, text='D1')
         TabControlPA.add(tabD2, text='D2')
 
-        # D1: insert figures
-        D1Fig = ttk.Label(tabD1, image = img)
-        D1Fig.grid(column=0, row=0)
+        # D1: insert figure(s)
+        self.OpenImage(tabD1,"sample-picture.png")
+        # D1Fig = ttk.Label(tabD1, image = img)
+        # D1Fig.grid(column=0, row=0)
 
         # D1: insert description
         D1Desc = HTMLScrolledText(tabD1, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
@@ -77,7 +74,7 @@ class GUIBescheid:
         #############################
         # positioning
         content.grid(column=0, row=0)
-        ApplFig.grid(column=0, row=0)
+        # ApplFig.grid(column=0, row=0)
         ApplDesc.grid(column=0, row=1)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
@@ -85,9 +82,27 @@ class GUIBescheid:
         #ButtonSearch.grid(column=0, row=1)
         #############################
 
-        # make mainloop
-        root.mainloop()
+
+    def OpenImage(self,frame,PathToImage):
+        # load, resize and render
+        imgload=Image.open(PathToImage)
+        imgresize=imgload.resize((500,300),Image.ANTIALIAS)
+        imgrender=ImageTk.PhotoImage(imgresize)
+        # add rendered image as label
+        img = ttk.Label(frame, image = imgrender)
+        img.pack()
+        # save rendered image so that it survives the garbage collector
+        img.image = imgrender
+        # positioning
+        img.grid(column=0,row=0)
+
 
 
 if __name__ == '__main__':
+    # make root widget
+    root = Tk()
+
     GUIBescheid()
+
+    # make mainloop
+    root.mainloop()
