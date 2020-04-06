@@ -42,7 +42,9 @@ class GUIBescheid:
         # make application part (left side)
         # Appl: insert figure(s)
         self.OpenImage(content,"sample-picture.jpg")
-        ApplDesc = HTMLScrolledText(content, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
+
+        # Appl: insert description
+        ApplDesc = HTMLScrolledText(content, html=open("desc.html", 'r', encoding='utf8').read())
         #############################
 
         #############################
@@ -61,7 +63,7 @@ class GUIBescheid:
         # D1Fig.grid(column=0, row=0)
 
         # D1: insert description
-        D1Desc = HTMLScrolledText(tabD1, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
+        D1Desc = HTMLScrolledText(tabD1, html=open("desc.html", 'r', encoding='utf8').read())
         D1Desc.grid(column=0, row=1)
         #############################
 
@@ -99,7 +101,6 @@ class GUIBescheid:
         img.image = imgrender
         # positioning
         img.grid(column=0,row=0)
-
 
 
 if __name__ == '__main__':
