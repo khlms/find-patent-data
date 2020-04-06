@@ -41,37 +41,22 @@ class GUIBescheid:
 
         #############################
         # make application part (left side)
-        # Appl: insert figure(s)
         ApplFig = ttk.Frame(content)
         ApplFig.grid(column=0,row=0,pady=(22,0)) #hardcoded heigth of TabControlPA
-        self.OpenImage(ApplFig,"sample-picture.jpg")
+        # Appl: insert figure(s)
+        self.OpenImage(ApplFig,"sample-picture1.jpg")
+        # Appl: insert description
         ApplDesc = HTMLScrolledText(content, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
         ApplDesc.grid(column=0, row=1)
         #############################
 
         #############################
-        # make prior art (D1 to Dn) part (right side)
-
-        # make tabs
+        # make prior art (D1 to Dn) part (right side) using tabs
         TabControlPA = ttk.Notebook(content)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
         self.AddPriorArt(TabControlPA)
         self.AddPriorArt(TabControlPA)
-
-        # tabD1 = ttk.Frame(TabControlPA)
-        # tabD2 = ttk.Frame(TabControlPA)
-        # TabControlPA.add(tabD1, text='D1')
-        # TabControlPA.add(tabD2, text='D2')
-        #
-        # # D1: insert figure(s)
-        # D1Fig = ttk.Frame(tabD1)
-        # D1Fig.grid(column=0,row=0)
-        # self.OpenImage(D1Fig,"sample-picture.jpg")
-        #
-        # # D1: insert description
-        # D1Desc = HTMLScrolledText(tabD1, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
-        # D1Desc.grid(column=0, row=1)
         #############################
 
         # search field
@@ -91,7 +76,6 @@ class GUIBescheid:
         imgrender = ImageTk.PhotoImage(imgload)
         # add rendered image as label
         img = ttk.Label(frame, image = imgrender)
-        img.pack()
 
         # # add rendered image as canvas
         # img = Canvas(frame,width=1000, height=500)
@@ -101,23 +85,23 @@ class GUIBescheid:
         # save rendered image so that it survives the garbage collector
         img.image = imgrender
         # positioning
-        # img.grid(column=0,row=0)
+        img.grid(column=0,row=0)
 
 
     def AddPriorArt(self,notebook):
         # PatentNumber: string that identifies patent on patents.google.com
-        tabD1 = ttk.Frame(notebook)
-        tabD1.grid(column=0,row=0)
-        notebook.add(tabD1, text="PatentNumber")
+        tabD = ttk.Frame(notebook)
+        tabD.grid(column=0,row=0)
+        notebook.add(tabD, text="PatentNumber")
 
-        # D1: insert figure(s)
-        D1Fig = ttk.Frame(tabD1)
-        D1Fig.grid(column=0,row=0)
-        self.OpenImage(D1Fig,"sample-picture.jpg")
+        # insert figure(s)
+        DFig = ttk.Frame(tabD)
+        DFig.grid(column=0,row=0)
+        self.OpenImage(DFig,"sample-picture3.jpg")
 
-        # D1: insert description
-        D1Desc = HTMLScrolledText(tabD1, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
-        D1Desc.grid(column=0, row=1)
+        # insert description
+        DDesc = HTMLScrolledText(tabD, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
+        DDesc.grid(column=0, row=1)
 
 
 if __name__ == '__main__':
