@@ -41,7 +41,9 @@ class GUIBescheid:
         #############################
         # make application part (left side)
         # Appl: insert figure(s)
-        self.OpenImage(content,"sample-picture.jpg",22) #hardcoded heigth of TabControlPA
+        ApplFig = ttk.Frame(content)
+        ApplFig.grid(column=0,row=0,pady=(22,0))
+        self.OpenImage(ApplFig,"sample-picture.jpg") #hardcoded heigth of TabControlPA
         ApplDesc = HTMLScrolledText(content, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
         #############################
 
@@ -56,7 +58,9 @@ class GUIBescheid:
         TabControlPA.add(tabD2, text='D2')
 
         # D1: insert figure(s)
-        self.OpenImage(tabD1,"sample-picture.jpg")
+        D1Fig = ttk.Frame(tabD1)
+        D1Fig.grid(column=0,row=0)
+        self.OpenImage(D1Fig,"sample-picture.jpg")
         # D1Fig = ttk.Label(tabD1, image = img)
         # D1Fig.grid(column=0, row=0)
 
@@ -81,7 +85,7 @@ class GUIBescheid:
         #############################
 
 
-    def OpenImage(self,frame,PathToImage,vertspacetop=0):
+    def OpenImage(self,frame,PathToImage):
         # load, resize and render
         imgload = Image.open(PathToImage)
         imgload.thumbnail((880, 380), Image.ANTIALIAS)
@@ -98,7 +102,7 @@ class GUIBescheid:
         # save rendered image so that it survives the garbage collector
         img.image = imgrender
         # positioning
-        img.grid(column=0,row=0,pady=(vertspacetop,0))
+        # img.grid(column=0,row=0)
 
 
 
