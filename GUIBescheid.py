@@ -55,8 +55,8 @@ class GUIBescheid:
         TabControlPA = ttk.Notebook(content)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
-        self.AddPriorArt(TabControlPA)
-        self.AddPriorArt(TabControlPA)
+        self.TabPriorArt(TabControlPA)
+        self.TabPriorArt(TabControlPA)
         #############################
 
         # search field
@@ -88,7 +88,7 @@ class GUIBescheid:
         img.grid(column=0,row=0)
 
 
-    def AddPriorArt(self,notebook):
+    def TabPriorArt(self,notebook):
         # PatentNumber: string that identifies patent on patents.google.com
         tabD = ttk.Frame(notebook)
         tabD.grid(column=0,row=0)
