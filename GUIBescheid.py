@@ -8,8 +8,6 @@ from PIL import ImageTk,Image  # to be able to show png, jpg, for python3: pip i
 
 class GUIBescheid:
     def __init__(self):
-
-
         # maximize window
         #TODO: maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
@@ -43,7 +41,7 @@ class GUIBescheid:
         #############################
         # make application part (left side)
         # Appl: insert figure(s)
-        self.OpenImage(content,"sample-picture.png")
+        self.OpenImage(content,"sample-picture.jpg")
         ApplDesc = HTMLScrolledText(content, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
         #############################
 
@@ -58,7 +56,7 @@ class GUIBescheid:
         TabControlPA.add(tabD2, text='D2')
 
         # D1: insert figure(s)
-        self.OpenImage(tabD1,"sample-picture.png")
+        self.OpenImage(tabD1,"sample-picture.jpg")
         # D1Fig = ttk.Label(tabD1, image = img)
         # D1Fig.grid(column=0, row=0)
 
@@ -85,12 +83,18 @@ class GUIBescheid:
 
     def OpenImage(self,frame,PathToImage):
         # load, resize and render
-        imgload=Image.open(PathToImage)
-        imgresize=imgload.resize((500,300),Image.ANTIALIAS)
-        imgrender=ImageTk.PhotoImage(imgresize)
+        imgload = Image.open(PathToImage)
+        imgload.thumbnail((880, 380), Image.ANTIALIAS)
+        imgrender = ImageTk.PhotoImage(imgload)
         # add rendered image as label
         img = ttk.Label(frame, image = imgrender)
         img.pack()
+
+        # # add rendered image as canvas
+        # img = Canvas(frame,width=1000, height=500)
+        # img.pack()
+        # img.create_image(20,20,anchor=NW,image = imgrender)
+
         # save rendered image so that it survives the garbage collector
         img.image = imgrender
         # positioning

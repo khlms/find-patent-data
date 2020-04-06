@@ -9,6 +9,7 @@ from urllib.request import urlretrieve
 from urllib.error import HTTPError
 import os
 from pathlib import Path
+import cv2 #convert png to jpg for gui
 
 
 def patent_google_func(patent, UserPath=os.getcwd()):
@@ -67,7 +68,12 @@ def patent_google_func(patent, UserPath=os.getcwd()):
             PicturesAll = PatentSoup.find_all("li",{"itemprop":"images"})
             PicturesURLs = [picture.find("meta",{"itemprop":"full"}).get("content") for picture in PicturesAll]
             for picture in PicturesURLs:
-                urlretrieve(picture, os.path.join(path, picture.split('/')[-1]))
+                PictureName = os.path.join(path, picture.split('/')[-1])
+                urlretrieve(picture, PictureName)
+                # convert png to jpg for reasons
+                PicturePNG = cv2.imread(PictureName)
+                cv2.imwrite(PictureName[:-3] + 'jpg', PicturePNG)
+
         except FileNotFoundError as err:
             print(err)
         except HTTPError as err:
