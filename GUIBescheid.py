@@ -43,15 +43,10 @@ class GUIBescheid:
         # make application part (left side)
         ApplFig = ttk.Frame(content)
         ApplFig.grid(column=0,row=0,pady=(22,0)) #hardcoded heigth of TabControlPA
-<<<<<<< HEAD
         # Appl: insert figure(s)
         self.OpenImage(ApplFig,"sample-picture1.jpg")
         # Appl: insert description
-        ApplDesc = HTMLScrolledText(content, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
-=======
-        self.OpenImage(ApplFig,"sample-picture.jpg")
         ApplDesc = HTMLScrolledText(content, html=open("desc.html", 'r', encoding='utf8').read())
->>>>>>> 897d5984e68ce2e2d9f074330458e6846de128e4
         ApplDesc.grid(column=0, row=1)
         #############################
 
@@ -95,7 +90,6 @@ class GUIBescheid:
 
     def AddPriorArt(self,notebook):
         # PatentNumber: string that identifies patent on patents.google.com
-<<<<<<< HEAD
         tabD = ttk.Frame(notebook)
         tabD.grid(column=0,row=0)
         notebook.add(tabD, text="PatentNumber")
@@ -106,22 +100,8 @@ class GUIBescheid:
         self.OpenImage(DFig,"sample-picture3.jpg")
 
         # insert description
-        DDesc = HTMLScrolledText(tabD, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
+        DDesc = HTMLScrolledText(tabD, html=open("desc.html", 'r', encoding='utf8').read())
         DDesc.grid(column=0, row=1)
-=======
-        tabD1 = ttk.Frame(notebook)
-        tabD1.grid(column=0,row=0)
-        notebook.add(tabD1, text="PatentNumber")
-
-        # D1: insert figure(s)
-        D1Fig = ttk.Frame(tabD1)
-        D1Fig.grid(column=0,row=0)
-        self.OpenImage(D1Fig,"sample-picture.jpg")
-
-        # D1: insert description
-        D1Desc = HTMLScrolledText(tabD1, html=open("desc.html", 'r', encoding='utf8').read())
-        D1Desc.grid(column=0, row=1)
->>>>>>> 897d5984e68ce2e2d9f074330458e6846de128e4
 
 if __name__ == '__main__':
     # make root widget
