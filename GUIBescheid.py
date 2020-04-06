@@ -44,7 +44,8 @@ class GUIBescheid:
         ApplFig = ttk.Frame(content)
         ApplFig.grid(column=0,row=0,pady=(22,0)) #hardcoded heigth of TabControlPA
         # Appl: insert figure(s)
-        self.OpenImage(ApplFig,"sample-picture1.jpg")
+        LoadImage(root,ApplFig,"sample-picture1.jpg")
+        #self.OpenImage(ApplFig,"sample-picture1.jpg")
         # Appl: insert description
         ApplDesc = HTMLScrolledText(content, html=open("desc.html", 'r', encoding='utf8').read())
         ApplDesc.grid(column=0, row=1)
@@ -97,11 +98,58 @@ class GUIBescheid:
         # insert figure(s)
         DFig = ttk.Frame(tabD)
         DFig.grid(column=0,row=0)
+        #LoadImage(root,DFig,"sample-picture3.jpg")
         self.OpenImage(DFig,"sample-picture3.jpg")
 
         # insert description
         DDesc = HTMLScrolledText(tabD, html=open("desc.html", 'r', encoding='utf8').read())
         DDesc.grid(column=0, row=1)
+
+
+class LoadImage:
+        def __init__(self,root,frame,PathToImage):
+            # TODO: größe anpassen, zoomen nicht überall
+            # TODO: zoomen nicht ins thumbnail
+            # TODO: zoom funktioniert nicht bei doppelter Verwendung (links+rechts)
+            self.canvas = Canvas(frame,width=500,height=380)
+            self.canvas.grid(column=0,row=0)
+            frame.grid(column=0,row=0)
+            self.orig_img = Image.open(PathToImage)
+            self.orig_img.thumbnail((500, 380), Image.ANTIALIAS)
+            self.img = ImageTk.PhotoImage(self.orig_img)
+            self.canvas.create_image(0,0,image=self.img, anchor="nw")
+
+            self.zoomcycle = 0
+            self.zimg_id = None
+
+            root.bind("<MouseWheel>",self.zoomer)
+            self.canvas.bind("<Motion>",self.crop)
+
+        def zoomer(self,event):
+            if (event.delta > 0):
+                if self.zoomcycle != 4: self.zoomcycle += 1
+            elif (event.delta < 0):
+                if self.zoomcycle != 0: self.zoomcycle -= 1
+            self.crop(event)
+
+        def crop(self,event):
+            if self.zimg_id: self.canvas.delete(self.zimg_id)
+            if (self.zoomcycle) != 0:
+                x,y = event.x, event.y
+                xFac = 30
+                yFac = 20
+                if self.zoomcycle == 1:
+                    tmp = self.orig_img.crop((x-4*xFac,y-4*yFac,x+4*xFac,y+4*yFac))
+                elif self.zoomcycle == 2:
+                    tmp = self.orig_img.crop((x-3*xFac,y-3*yFac,x+3*xFac,y+3*yFac))
+                elif self.zoomcycle == 3:
+                    tmp = self.orig_img.crop((x-2*xFac,y-2*yFac,x+2*xFac,y+2*yFac))
+                elif self.zoomcycle == 4:
+                    tmp = self.orig_img.crop((x-xFac,y-2*yFac,x+xFac,y+2*yFac))
+                size = 600,400
+                self.zimg = ImageTk.PhotoImage(tmp.resize(size))
+                self.zimg_id = self.canvas.create_image(event.x,event.y,image=self.zimg)
+
 
 if __name__ == '__main__':
     # make root widget
