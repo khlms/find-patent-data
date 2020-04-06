@@ -41,7 +41,7 @@ class GUIBescheid:
         #############################
         # make application part (left side)
         # Appl: insert figure(s)
-        self.OpenImage(content,"sample-picture.jpg")
+        self.OpenImage(content,"sample-picture.jpg",22) #hardcoded heigth of TabControlPA
         ApplDesc = HTMLScrolledText(content, html='<h1 style="color: red; text-align: center"> Hello World </H1><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p><p>asfa</p>')
         #############################
 
@@ -81,7 +81,7 @@ class GUIBescheid:
         #############################
 
 
-    def OpenImage(self,frame,PathToImage):
+    def OpenImage(self,frame,PathToImage,vertspacetop=0):
         # load, resize and render
         imgload = Image.open(PathToImage)
         imgload.thumbnail((880, 380), Image.ANTIALIAS)
@@ -98,7 +98,7 @@ class GUIBescheid:
         # save rendered image so that it survives the garbage collector
         img.image = imgrender
         # positioning
-        img.grid(column=0,row=0)
+        img.grid(column=0,row=0,pady=(vertspacetop,0))
 
 
 
