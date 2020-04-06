@@ -145,7 +145,7 @@ class LoadImage:
                 elif self.zoomcycle == 3:
                     tmp = self.orig_img.crop((x-2*xFac,y-2*yFac,x+2*xFac,y+2*yFac))
                 elif self.zoomcycle == 4:
-                    tmp = self.orig_img.crop((x-xFac,y-2*yFac,x+xFac,y+2*yFac))
+                    tmp = self.orig_img.crop((x-xFac,y-yFac,x+xFac,y+yFac))
                 size = 600,400
                 self.zimg = ImageTk.PhotoImage(tmp.resize(size))
                 self.zimg_id = self.canvas.create_image(event.x,event.y,image=self.zimg)
