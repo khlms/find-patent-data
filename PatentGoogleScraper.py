@@ -6,24 +6,23 @@ from bs4 import BeautifulSoup
 # import csv
 # import pandas
 from urllib.request import urlretrieve
-from urllib.error import HTTPError
-import os
+from urllib.error import HTTPErrors
 from pathlib import Path
 import cv2 #convert png to jpg for gui
 
 
-def PatentGoogleScrape(patent, UserPath=os.getcwd()):
+def PatentGoogleScrape(patent, UserPath=Path.cwd() / "patents"):
     # Looks up a patent on patents.google.com via its patent number
     # yields: title (string), claims (html file), description (html file), images
     if patent == '':
         print("No patent entered, stop.")
         exit()
     else:
+        PathToPatent = UserPath / patent
         try:
-            os.makedirs(os.path.join(UserPath, patent))
+            PathToPatent.mkdir(parents=True)
             print("Directory " + patent + " created.")
-            path = os.path.join(UserPath , patent)
-            print(path)
+            print(PathToPatent)
         except FileExistsError:
             print("Directory " + patent + " already exists, stop.")
             exit()
@@ -61,26 +60,27 @@ def PatentGoogleScrape(patent, UserPath=os.getcwd()):
         # df.to_csv("patents.csv", index=False, header=False)
         # get all claims
         claims = PatentSoup.find("section",{"itemprop":"claims"})
-        with open(os.path.join(path, patent + "-claims.html"), "w", encoding=enc) as html_file:
+        ClaimsFilename = patent + "-claims.html"
+        with open(PathToPatent / ClaimsFilename, "w", encoding=enc) as html_file:
             html_file.write(str(claims))
         #
         try:
             PicturesAll = PatentSoup.find_all("li",{"itemprop":"images"})
             PicturesURLs = [picture.find("meta",{"itemprop":"full"}).get("content") for picture in PicturesAll]
             for picture in PicturesURLs:
-                PictureName = os.path.join(path, picture.split('/')[-1])
-                urlretrieve(picture, PictureName)
-                # convert png to jpg for reasons
-                PicturePNG = cv2.imread(PictureName)
-                cv2.imwrite(PictureName[:-3] + 'jpg', PicturePNG)
-
+                PathToPicture = PathToPatent / picture.split('/')[-1]
+                urlretrieve(picture, PathToPicture)
+                # convert png to jpg because this somehow looks way better
+                PicturePNG = cv2.imread(str(PathToPicture))
+                cv2.imwrite(str(PathToPicture)[:-3] + 'jpg', PicturePNG)
         except FileNotFoundError as err:
             print(err)
         except HTTPError as err:
             print(err)
         #
         description = PatentSoup.find("section",{"itemprop":"description"})
-        with open(os.path.join(path, patent + "-description.html"), "w", encoding=enc) as html_file:
+        DescFilename = patent + "-description.html"
+        with open(PathToPatent / DescFilename, "w", encoding=enc) as html_file:
             html_file.write(str(description))
         print("Done.")
 
@@ -91,16 +91,15 @@ if __name__ == '__main__':
     patent = input("Enter patent number: ").strip()
     PathBool = input("Do you want to enter your own path? (y/n): ").strip()
     if PathBool == "y":
-        print("Correct formatting (current folder, default path):" + os.getcwd())
-        UserPathRaw = input("Enter path: ").strip()
-        if os.path.isdir(UserPathRaw) == False:
-            print("This is not a valid path: " + UserPathRaw)
+        print("Correct formatting (current folder, i.e. default path):" + Path.cwd())
+        UserPath = input("Enter path: ").strip()
+        if path.is_dir(UserPath) == False:
+            print("This is not a valid path: " + UserPath)
             exit()
         else:
-            UserPath = UserPathRaw
             PatentGoogleScrape(patent, UserPath)
     elif not PathBool == "n":
         print("\"" + PathBool + "\" is not a valid option.")
         exit()
     else:
-        patent_google_func(patent)
+        PatentGoogleScrape(patent)
