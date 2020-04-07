@@ -12,7 +12,7 @@ from pathlib import Path
 import cv2 #convert png to jpg for gui
 
 
-def patent_google_func(patent, UserPath=os.getcwd()):
+def PatentGoogleScrape(patent, UserPath=os.getcwd()):
     # Looks up a patent on patents.google.com via its patent number
     # yields: title (string), claims (html file), description (html file), images
     if patent == '':
@@ -98,7 +98,7 @@ if __name__ == '__main__':
             exit()
         else:
             UserPath = UserPathRaw
-            patent_google_func(patent, UserPath)
+            PatentGoogleScrape(patent, UserPath)
     elif not PathBool == "n":
         print("\"" + PathBool + "\" is not a valid option.")
         exit()

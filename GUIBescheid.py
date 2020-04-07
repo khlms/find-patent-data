@@ -5,6 +5,8 @@ from tkinter import ttk
 from tkhtmlview import HTMLScrolledText # insert HTML
 from PIL import ImageTk,Image  # to be able to show png, jpg, for python3: pip install pillow
 
+from PatentGoogleScraper import PatentGoogleScrape
+
 
 class GUIBescheid:
     def __init__(self):
@@ -52,12 +54,12 @@ class GUIBescheid:
         #############################
 
         #############################
-        # make prior art (D1 to Dn) part (right side) using tabs
+        # make prior art part (right side) using tabs
         TabControlPA = ttk.Notebook(content)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
-        self.TabPriorArt(TabControlPA)
-        self.TabPriorArt(TabControlPA)
+        self.TabPriorArt(TabControlPA,"PatentNumber")
+        self.TabPriorArt(TabControlPA,"test2")
         #############################
 
         # search field
@@ -89,11 +91,14 @@ class GUIBescheid:
         img.grid(column=0,row=0)
 
 
-    def TabPriorArt(self,notebook):
-        # PatentNumber: string that identifies patent on patents.google.com
+    def TabPriorArt(self,notebook,PatentNumber):
+        # generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)
         tabD = ttk.Frame(notebook)
         tabD.grid(column=0,row=0)
-        notebook.add(tabD, text="PatentNumber")
+        notebook.add(tabD, text=PatentNumber)
+
+        # download patent
+        PatentGoogleScrape("US20190313022A1")
 
         # insert figure(s)
         DFig = ttk.Frame(tabD)
@@ -111,6 +116,7 @@ class LoadImage:
         # TODO: größe anpassen, zoomen nicht überall
         # TODO: zoomen nicht ins thumbnail
         # TODO: zoom funktioniert nicht bei doppelter Verwendung (links+rechts)
+        # TODO: hardcoded sizes
         self.canvas = Canvas(frame,width=500,height=380)
         self.canvas.grid(column=0,row=0)
         frame.grid(column=0,row=0)
