@@ -1,0 +1,3 @@
+test*.py
+patents/*
+__pycache__/*
