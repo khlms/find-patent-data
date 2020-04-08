@@ -4,6 +4,8 @@ from tkinter import *
 from tkinter import ttk
 from tkhtmlview import HTMLScrolledText # insert HTML
 from PIL import ImageTk,Image  # to be able to show png, jpg, for python3: pip install pillow
+from pathlib import Path
+
 
 from PatentGoogleScraper import PatentGoogleScrape
 
@@ -58,8 +60,8 @@ class GUIBescheid:
         TabControlPA = ttk.Notebook(content)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
-        self.TabPriorArt(TabControlPA,"PatentNumber")
-        self.TabPriorArt(TabControlPA,"test2")
+        self.TabPriorArt(TabControlPA,"US20190313022A1")
+        self.TabPriorArt(TabControlPA,"US10397476B2")
         #############################
 
         # search field
@@ -91,20 +93,27 @@ class GUIBescheid:
         img.grid(column=0,row=0)
 
 
-    def TabPriorArt(self,notebook,PatentNumber):
-        # generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)
+    def TabPriorArt(self,notebook,PatentNumber, PathToFiles = ""):
+        ## generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)
         tabD = ttk.Frame(notebook)
         tabD.grid(column=0,row=0)
         notebook.add(tabD, text=PatentNumber)
 
-        # download patent
-        PatentGoogleScrape("US20190313022A1")
-
-        # insert figure(s)
+        ## download patent
+        if PathToFiles == "":
+            PatentGoogleScrape(PatentNumber)
+            PathToFiles = Path.cwd() / "patents" / PatentNumber
+        else:
+            PatentgoogleScrape(PatentNumber, PathToFiles)
+            PathToFiles = PathToFiles / PatentNumber
+        ## make list of figures
+        ListofFigures = []
+        for currentFile in PathToFiles.glob("*.jpg"):
+            ListofFigures.append(currentFile)
         DFig = ttk.Frame(tabD)
         DFig.grid(column=0,row=0)
         #LoadImage(root,DFig,"sample-picture3.jpg")
-        self.OpenImage(DFig,"sample-picture3.jpg")
+        self.OpenImage(DFig,ListofFigures[0])
 
         # insert description
         DDesc = HTMLScrolledText(tabD, html=open("desc.html", 'r', encoding='utf8').read())
