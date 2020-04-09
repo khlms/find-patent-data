@@ -16,9 +16,9 @@ class GUIBescheid:
         #TODO: maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
-
+        root.resizable(True, True) #TODO also resize content
         # make title
-        root.title("Patent Tool") #TODO:better title
+        root.title("Compare Patents") #TODO:better title
 
         #############################
         # make menu
@@ -46,7 +46,7 @@ class GUIBescheid:
         #############################
         # make application part (left side)
         ApplFig = ttk.Frame(content)
-        ApplFig.grid(column=0,row=0,pady=(22,0)) #hardcoded heigth of TabControlPA
+        ApplFig.grid(column=0,row=0,pady=(22,0)) #TODO hardcoded heigth of TabControlPA
         # Appl: insert figure(s)
         LoadImage(root,ApplFig,"sample-picture1.jpg")
         #self.OpenImage(ApplFig,"sample-picture1.jpg")
