@@ -2,8 +2,8 @@
 
 from tkinter import *
 from tkinter import ttk
-from tkhtmlview import HTMLScrolledText # insert HTML
-from PIL import ImageTk,Image  # to be able to show png, jpg, for python3: pip install pillow
+from tkhtmlview import HTMLScrolledText ## insert HTML
+from PIL import ImageTk,Image  ## show png, jpg, for python3: pip install pillow
 from pathlib import Path
 
 
@@ -12,16 +12,16 @@ from PatentGoogleScraper import PatentGoogleScrape
 
 class GUIBescheid:
     def __init__(self):
-        # maximize window
+        ## maximize window
         #TODO: maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
         root.resizable(True, True) #TODO also resize content
-        # make title
+        ## make title
         root.title("Compare Patents") #TODO:better title
 
         #############################
-        # make menu
+        ## make menu
         def AddPriorArt():
             print("Test")
         def About():
@@ -39,32 +39,32 @@ class GUIBescheid:
         helpmenu.add_command(label="Über...", command=About)
         #############################
 
-        # make content frame
+        ## make content frame
         content = ttk.Frame(root)
         content.grid(column=0, row=0)
 
         #############################
-        # make application part (left side)
+        ## make application part (left side)
         ApplFig = ttk.Frame(content)
         ApplFig.grid(column=0,row=0,pady=(22,0)) #TODO hardcoded heigth of TabControlPA
-        # Appl: insert figure(s)
+        ## Appl: insert figure(s)
         LoadImage(root,ApplFig,"sample-picture1.jpg")
         #self.OpenImage(ApplFig,"sample-picture1.jpg")
-        # Appl: insert description
+        ## Appl: insert description
         ApplDesc = HTMLScrolledText(content, html=open("desc.html", 'r', encoding='utf8').read())
         ApplDesc.grid(column=0, row=1)
         #############################
 
         #############################
-        # make prior art part (right side) using tabs
+        ## make prior art part (right side) using tabs
         TabControlPA = ttk.Notebook(content)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
-        self.TabPriorArt(TabControlPA,"US20190313022A1")
-        self.TabPriorArt(TabControlPA,"US10397476B2")
+        TabPriorArt(TabControlPA,"US20190313022A1")
+        TabPriorArt(TabControlPA,"US10397476B2")
         #############################
 
-        # search field
+        ## search field
         EntrySearch = ttk.Entry(content)
         ButtonSearch = ttk.Button(content, text="Suchen")
 
@@ -75,29 +75,30 @@ class GUIBescheid:
 
 
     def OpenImage(self,frame,PathToImage):
-        # load, resize and render
+        ## load, resize and render
         imgload = Image.open(PathToImage)
         imgload.thumbnail((880, 380), Image.ANTIALIAS)
         imgrender = ImageTk.PhotoImage(imgload)
-        # add rendered image as label
+        ## add rendered image as label
         img = ttk.Label(frame, image = imgrender)
 
-        # # add rendered image as canvas
+        ## # add rendered image as canvas
         # img = Canvas(frame,width=1000, height=500)
         # img.pack()
         # img.create_image(20,20,anchor=NW,image = imgrender)
 
-        # save rendered image so that it survives the garbage collector
+        ## save rendered image so that it survives the garbage collector
         img.image = imgrender
-        # positioning
+        ## positioning
         img.grid(column=0,row=0)
 
 
-    def TabPriorArt(self,notebook,PatentNumber, PathToFiles = ""):
-        ## generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)
-        tabD = ttk.Frame(notebook)
-        tabD.grid(column=0,row=0)
-        notebook.add(tabD, text=PatentNumber)
+class TabPriorArt:
+    ## generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)
+    def __init__(self,notebook,PatentNumber, PathToFiles = ""):
+        self.tabD = ttk.Frame(notebook)
+        self.tabD.grid(column=0,row=0)
+        notebook.add(self.tabD, text=PatentNumber)
 
         ## download patent
         if PathToFiles == "":
@@ -107,18 +108,28 @@ class GUIBescheid:
             PatentgoogleScrape(PatentNumber, PathToFiles)
             PathToFiles = PathToFiles / PatentNumber
         ## make list of figures
-        ListofFigures = []
+        self.ListofFigures = []
         for currentFile in PathToFiles.glob("*.jpg"):
-            ListofFigures.append(currentFile)
-        DFig = ttk.Frame(tabD)
-        DFig.grid(column=0,row=0)
-        #LoadImage(root,DFig,"sample-picture3.jpg")
-        self.OpenImage(DFig,ListofFigures[0])
+            self.ListofFigures.append(currentFile)
+        ## show figure(s)
+        self.DFig = ttk.Frame(self.tabD)
+        self.DFig.grid(column=0,row=0)
+        LoadImage(root,self.DFig,self.ListofFigures[0])
+        # self.OpenImage(DFig,ListofFigures[0])
+        ## make buttons
+        self.prevBtn = Button(self.DFig, text="previous", command=self.prevFig)
+        self.prevBtn.grid(column=0,row=1)
+        self.nextBtn = Button(self.DFig, text="next", command=self.callback)
+        self.nextBtn.grid(column=1,row=1)
+        ## insert tabs for description/claims
+        self.DDesc = HTMLScrolledText(self.tabD, html=open("desc.html", 'r', encoding='utf8').read())
+        self.DDesc.grid(column=0, row=1)
 
-        # insert description
-        DDesc = HTMLScrolledText(tabD, html=open("desc.html", 'r', encoding='utf8').read())
-        DDesc.grid(column=0, row=1)
+    def callback():
+        print('hello stdout world...')
 
+    def prevFig():
+        print("previous Figure")
 
 class LoadImage:
     def __init__(self,root,frame,PathToImage):
@@ -127,8 +138,7 @@ class LoadImage:
         # TODO: zoom funktioniert nicht bei doppelter Verwendung (links+rechts)
         # TODO: hardcoded sizes
         self.canvas = Canvas(frame,width=500,height=380)
-        self.canvas.grid(column=0,row=0)
-        frame.grid(column=0,row=0)
+        self.canvas.grid(column=0,row=0,columnspan=2)
         self.orig_img = Image.open(PathToImage)
         self.orig_img.thumbnail((500, 380), Image.ANTIALIAS)
         self.img = ImageTk.PhotoImage(self.orig_img)
@@ -167,10 +177,10 @@ class LoadImage:
 
 
 if __name__ == '__main__':
-    # make root widget
+    ## make root widget
     root = Tk()
 
     GUIBescheid()
 
-    # make mainloop
+    ## make mainloop
     root.mainloop()
