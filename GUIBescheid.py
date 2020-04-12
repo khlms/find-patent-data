@@ -11,6 +11,7 @@ from PatentGoogleScraper import PatentGoogleScrape
 
 
 class GUIBescheid(Tk):
+    '''make GUI to compare patents'''
     def __init__(self):
         ## maximize window
         #TODO: maximize
@@ -21,7 +22,7 @@ class GUIBescheid(Tk):
         root.title("Compare Patents") #TODO:better title
 
         #############################
-        ## make menu
+        '''make menu'''
         def AddPriorArt():
             print("Test")
         def About():
@@ -39,15 +40,15 @@ class GUIBescheid(Tk):
         helpmenu.add_command(label="Über...", command=About)
         #############################
 
-        ## make content frame
+        '''make content frame'''
         content = ttk.Frame(root)
         content.grid(column=0, row=0)
 
         #############################
-        ## make application part (left side)
+        '''make application part (left side)'''
         ApplFig = ttk.Frame(content)
         ApplFig.grid(column=0,row=0,pady=(22,0)) #TODO hardcoded heigth of TabControlPA
-        ## Appl: insert figure(s)
+        '''Appl: insert figure(s)'''
         LoadImage(root,ApplFig,"sample-picture1.jpg")
         #self.OpenImage(ApplFig,"sample-picture1.jpg")
         ## Appl: insert description
@@ -56,7 +57,7 @@ class GUIBescheid(Tk):
         #############################
 
         #############################
-        ## make prior art part (right side) using tabs
+        '''make prior art part (right side) using tabs'''
         TabControlPA = ttk.Notebook(content)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
@@ -64,7 +65,7 @@ class GUIBescheid(Tk):
         TabPriorArt(TabControlPA,"US10397476B2")
         #############################
 
-        ## search field
+        '''search field'''
         EntrySearch = ttk.Entry(content)
         ButtonSearch = ttk.Button(content, text="Suchen")
 
@@ -75,26 +76,26 @@ class GUIBescheid(Tk):
 
 
     def OpenImage(self,frame,PathToImage):
-        ## load, resize and render
+        '''load, resize and render'''
         imgload = Image.open(PathToImage)
         imgload.thumbnail((880, 380), Image.ANTIALIAS)
         imgrender = ImageTk.PhotoImage(imgload)
-        ## add rendered image as label
+        '''add rendered image as label'''
         img = ttk.Label(frame, image = imgrender)
-        ## save rendered image so that it survives the garbage collector
+        '''save rendered image so that it survives the garbage collector'''
         img.image = imgrender
-        ## positioning
+        '''positioning'''
         img.grid(column=0,row=0)
 
 
 class TabPriorArt(ttk.Frame):
-    ## generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)
+    '''generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)'''
     def __init__(self,notebook,PatentNumber, PathToFiles = ""):
         self.tabD = ttk.Frame(notebook)
         self.tabD.grid(column=0,row=0)
         notebook.add(self.tabD, text=PatentNumber)
 
-        ## download patent
+        '''download patent'''
         if PathToFiles == "":
             PatentGoogleScrape(PatentNumber)
             PathToFiles = Path.cwd() / "patents" / PatentNumber
@@ -105,7 +106,7 @@ class TabPriorArt(ttk.Frame):
 
         PatentFigures(root,self.tabD,PathToFiles)
 
-        ## insert tabs for description/claims
+        '''insert tabs for description/claims'''
         #TODO
         self.DDesc = HTMLScrolledText(self.tabD, html=open("desc.html", 'r', encoding='utf8').read())
         self.DDesc.grid(column=0, row=1)
@@ -116,13 +117,13 @@ class PatentFigures(ttk.Frame):
         self.DFig = ttk.Frame(parent)
         self.DFig.grid(column=0,row=0)
 
-        ## make container
+        '''container for image frames'''
         self.container = ttk.Frame(self.DFig)
         self.container.pack(side="top", fill="both", expand=True)
         self.container.grid_rowconfigure(0, weight=1)
         self.container.grid_columnconfigure(0, weight=1)
 
-        ## make list of figures
+        '''list of figures'''
         self.ListofFigures = []
         for currentFile in PathToFiles.glob("*.jpg"):
             self.ListofFigures.append(currentFile)
@@ -138,7 +139,7 @@ class PatentFigures(ttk.Frame):
         self.show_frame(0)
 
 
-    def show_frame(self, FrameNumber): #TODO here
+    def show_frame(self, FrameNumber):
             '''Show a frame for the given page name'''
             frame = self.ListofFrames[FrameNumber]
             frame.tkraise()
@@ -214,10 +215,10 @@ class LoadImage(ttk.Frame):
 
 
 if __name__ == '__main__':
-    ## make root widget
+    '''make root widget'''
     root = Tk()
 
     GUIBescheid()
 
-    ## make mainloop
+    '''make mainloop'''
     root.mainloop()
