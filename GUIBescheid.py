@@ -23,6 +23,7 @@ class GUIBescheid(Tk):
 
         #############################
         '''make menu'''
+        #TODO still useless
         def AddPriorArt():
             print("Test")
         def About():
@@ -159,9 +160,9 @@ class FigsBttns(ttk.Frame):
         # self.OpenImage(DFig,ListofFigures[0])
 
         '''make buttons'''
-        self.prevBtn = Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
+        self.prevBtn = ttk.Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
         self.prevBtn.grid(column=0,row=1)
-        self.nextBtn = Button(self, text="next", command=lambda: self.controller.show_frame(indexInt+1))
+        self.nextBtn = ttk.Button(self, text="next", command=lambda: self.controller.show_frame(indexInt+1))
         self.nextBtn.grid(column=1,row=1)
 
         if indexInt == 0:
