@@ -172,9 +172,7 @@ class FigsBttns(ttk.Frame):
 
 class LoadImage(ttk.Frame):
     def __init__(self,root,parent,PathToImage):
-        # TODO: größe anpassen, zoomen nicht überall
         # TODO: zoomen nicht ins thumbnail
-        # TODO: zoom funktioniert nicht bei doppelter Verwendung (links+rechts)
         # TODO: hardcoded sizes
         self.canvas = Canvas(parent,width=500,height=380)
         self.canvas.grid(column=0,row=0,columnspan=2)
@@ -186,7 +184,7 @@ class LoadImage(ttk.Frame):
         self.zoomcycle = 0
         self.zimg_id = None
 
-        root.bind("<MouseWheel>",self.zoomer)
+        self.canvas.bind("<MouseWheel>",self.zoomer)
         self.canvas.bind("<Motion>",self.crop)
 
     def zoomer(self,event):
