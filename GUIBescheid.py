@@ -13,12 +13,12 @@ from PatentGoogleScraper import PatentGoogleScrape
 class GUIBescheid(Tk):
     '''make GUI to compare patents'''
     def __init__(self):
-        ## maximize window
+        '''maximize window'''
         #TODO: maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
         root.resizable(True, True) #TODO also resize content
-        ## make title
+        '''make title'''
         root.title("Compare Patents") #TODO:better title
 
         #############################
@@ -51,7 +51,7 @@ class GUIBescheid(Tk):
         '''Appl: insert figure(s)'''
         LoadImage(root,ApplFig,"sample-picture1.jpg")
         #self.OpenImage(ApplFig,"sample-picture1.jpg")
-        ## Appl: insert description
+        '''Appl: insert description'''
         ApplDesc = HTMLScrolledText(content, html=open("desc.html", 'r', encoding='utf8').read())
         ApplDesc.grid(column=0, row=1)
         #############################
@@ -103,13 +103,20 @@ class TabPriorArt(ttk.Frame):
             PatentgoogleScrape(PatentNumber, PathToFiles)
             PathToFiles = PathToFiles / PatentNumber
 
-
+        '''insert images'''
         PatentFigures(root,self.tabD,PathToFiles)
 
-        '''insert tabs for description/claims'''
-        #TODO
-        self.DDesc = HTMLScrolledText(self.tabD, html=open("desc.html", 'r', encoding='utf8').read())
-        self.DDesc.grid(column=0, row=1)
+        '''insert tabs for description/claims (html)'''
+        self.TabText = ttk.Notebook(self.tabD)
+        self.TabText.grid(column=0, row=1)
+
+        self.DDesc = HTMLScrolledText(self.TabText, html=open(PathToFiles / (PatentNumber + "-description.html"), 'r', encoding='utf8').read())
+        self.DDesc.grid()
+        self.TabText.add(self.DDesc, text="Description")
+
+        self.DClaims = HTMLScrolledText(self.TabText, html=open(PathToFiles / (PatentNumber + "-claims.html"), 'r', encoding='utf8').read())
+        self.DClaims.grid()
+        self.TabText.add(self.DClaims, text="Claims")
 
 
 class PatentFigures(ttk.Frame):
