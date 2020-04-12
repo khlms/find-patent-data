@@ -10,7 +10,7 @@ from pathlib import Path
 from PatentGoogleScraper import PatentGoogleScrape
 
 
-class GUIBescheid:
+class GUIBescheid(Tk):
     def __init__(self):
         ## maximize window
         #TODO: maximize
@@ -81,19 +81,13 @@ class GUIBescheid:
         imgrender = ImageTk.PhotoImage(imgload)
         ## add rendered image as label
         img = ttk.Label(frame, image = imgrender)
-
-        ## # add rendered image as canvas
-        # img = Canvas(frame,width=1000, height=500)
-        # img.pack()
-        # img.create_image(20,20,anchor=NW,image = imgrender)
-
         ## save rendered image so that it survives the garbage collector
         img.image = imgrender
         ## positioning
         img.grid(column=0,row=0)
 
 
-class TabPriorArt:
+class TabPriorArt(ttk.Frame):
     ## generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)
     def __init__(self,notebook,PatentNumber, PathToFiles = ""):
         self.tabD = ttk.Frame(notebook)
@@ -107,37 +101,82 @@ class TabPriorArt:
         else:
             PatentgoogleScrape(PatentNumber, PathToFiles)
             PathToFiles = PathToFiles / PatentNumber
+
+
+        PatentFigures(root,self.tabD,PathToFiles)
+
+        ## insert tabs for description/claims
+        #TODO
+        self.DDesc = HTMLScrolledText(self.tabD, html=open("desc.html", 'r', encoding='utf8').read())
+        self.DDesc.grid(column=0, row=1)
+
+
+class PatentFigures(ttk.Frame):
+    def __init__(self,root,parent,PathToFiles):
+        self.DFig = ttk.Frame(parent)
+        self.DFig.grid(column=0,row=0)
+
+        ## make container
+        self.container = ttk.Frame(self.DFig)
+        self.container.pack(side="top", fill="both", expand=True)
+        self.container.grid_rowconfigure(0, weight=1)
+        self.container.grid_columnconfigure(0, weight=1)
+
         ## make list of figures
         self.ListofFigures = []
         for currentFile in PathToFiles.glob("*.jpg"):
             self.ListofFigures.append(currentFile)
-        ## show figure(s)
-        self.DFig = ttk.Frame(self.tabD)
-        self.DFig.grid(column=0,row=0)
-        LoadImage(root,self.DFig,self.ListofFigures[0])
+        self.ListofFigures.append("None")
+        self.ListofFigures.insert(0,"None")
+
+        self.ListofFrames = []
+        for i in range(len(self.ListofFigures)-2):
+            self.TempFrame = FigsBttns(root,self.container,self,i,len(self.ListofFigures)-2,self.ListofFigures[i+1])
+            self.ListofFrames.append(self.TempFrame)
+            self.TempFrame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame(0)
+
+
+    def show_frame(self, FrameNumber): #TODO here
+            '''Show a frame for the given page name'''
+            frame = self.ListofFrames[FrameNumber]
+            frame.tkraise()
+
+class FigsBttns(ttk.Frame):
+    def __init__(self,root,parent,controller,indexInt,maxInt,currentImage):
+        ttk.Frame.__init__(self, parent)
+        self.controller = controller
+        LoadImage(root,self,currentImage)
         # self.OpenImage(DFig,ListofFigures[0])
-        ## make buttons
-        self.prevBtn = Button(self.DFig, text="previous", command=self.prevFig)
+
+        '''make buttons'''
+        self.prevBtn = Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
         self.prevBtn.grid(column=0,row=1)
-        self.nextBtn = Button(self.DFig, text="next", command=self.callback)
+        self.nextBtn = Button(self, text="next", command=lambda: self.controller.show_frame(indexInt+1))
         self.nextBtn.grid(column=1,row=1)
-        ## insert tabs for description/claims
-        self.DDesc = HTMLScrolledText(self.tabD, html=open("desc.html", 'r', encoding='utf8').read())
-        self.DDesc.grid(column=0, row=1)
 
-    def callback():
-        print('hello stdout world...')
+        if indexInt == 0:
+            self.prevBtn['state'] = 'disabled'
+            self.nextBtn['state'] = 'normal'
+        elif indexInt < maxInt-1:
+            self.prevBtn['state'] = 'normal'
+            self.nextBtn['state'] = 'normal'
+        elif indexInt == maxInt -1:
+            self.prevBtn['state'] = 'normal'
+            self.nextBtn['state'] = 'disabled'
 
-    def prevFig():
-        print("previous Figure")
 
-class LoadImage:
-    def __init__(self,root,frame,PathToImage):
+
+
+
+class LoadImage(ttk.Frame):
+    def __init__(self,root,parent,PathToImage):
         # TODO: größe anpassen, zoomen nicht überall
         # TODO: zoomen nicht ins thumbnail
         # TODO: zoom funktioniert nicht bei doppelter Verwendung (links+rechts)
         # TODO: hardcoded sizes
-        self.canvas = Canvas(frame,width=500,height=380)
+        self.canvas = Canvas(parent,width=500,height=380)
         self.canvas.grid(column=0,row=0,columnspan=2)
         self.orig_img = Image.open(PathToImage)
         self.orig_img.thumbnail((500, 380), Image.ANTIALIAS)
