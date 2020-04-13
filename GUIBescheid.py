@@ -29,7 +29,7 @@ class GUIBescheid(Tk):
         def About():
             print("Test")
 
-        menu = Menu(root)
+        menu = Menu(root,tearoff=0)
         root.config(menu=menu)
         filemenu = Menu(menu,tearoff=0)
         menu.add_cascade(label="Stand der Technik", menu=filemenu)
