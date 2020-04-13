@@ -3,6 +3,7 @@
 from tkinter import *
 from tkinter import ttk
 from tkhtmlview import HTMLScrolledText ## insert HTML
+from tkinter import filedialog
 from PIL import ImageTk,Image  ## show png, jpg, for python3: pip install pillow
 from pathlib import Path
 
@@ -17,16 +18,21 @@ class GUIBescheid(Tk):
         #TODO: maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
-        root.resizable(True, True) #TODO also resize content
+        root.resizable(True, True) #TODO also resize content?
         '''make title'''
         root.title("Compare Patents") #TODO:better title
 
         #############################
         '''make menu'''
-        #TODO still useless
         def AddPriorArt():
-            print("Test")
+            self.w=PopupPatentEntry(root)
+            root.wait_window(self.w.top)
+            self.UserPatent = self.w.value
+            print(self.UserPatent)
+            TabPriorArt(TabControlPA,self.UserPatent)
+
         def About():
+            #TODO still useless
             print("Test")
 
         menu = Menu(root,tearoff=0)
@@ -89,6 +95,30 @@ class GUIBescheid(Tk):
         img.grid(column=0,row=0)
 
 
+class PopupPatentEntry(object):
+    def __init__(self,parent):
+        self.top = Toplevel(parent)
+        self.label1 = ttk.Label(self.top,text="Enther the patent number:")
+        self.label1.pack()
+        self.userpatent = ttk.Entry(self.top)
+        self.userpatent.pack()
+        self.userpatent.focus()
+
+        self.label2 = ttk.Label(self.top,text="(Optional) Change default path:")
+        self.label2.pack()
+        self.userpath = ttk.Entry(self.top)
+        self.userpath.pack()
+        # self.userpath = filedialog.askdirectory()
+        #TODO Pfad auswählen klappt noch nicht. Eingegebener Pfad wird derzeit noch ignoriert.
+
+        self.bttnDone = Button(self.top,text='Ok',command=self.cleanup)
+        self.bttnDone.pack()
+
+    def cleanup(self):
+        self.value=self.userpatent.get()
+        self.top.destroy()
+
+
 class TabPriorArt(ttk.Frame):
     '''generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)'''
     def __init__(self,notebook,PatentNumber, PathToFiles = ""):
@@ -144,7 +174,11 @@ class PatentFigures(ttk.Frame):
             self.ListofFrames.append(self.TempFrame)
             self.TempFrame.grid(row=0, column=0, sticky="nsew")
 
-        self.show_frame(0)
+        try:
+            self.show_frame(0)
+        except:
+            pass
+            #TODO: make empty frame the size of the other frames
 
 
     def show_frame(self, FrameNumber):
@@ -174,8 +208,6 @@ class FigsBttns(ttk.Frame):
         elif indexInt == maxInt -1:
             self.prevBtn['state'] = 'normal'
             self.nextBtn['state'] = 'disabled'
-
-
 
 
 
