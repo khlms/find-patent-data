@@ -6,21 +6,26 @@ from tkhtmlview import HTMLScrolledText ## insert HTML
 from tkinter import filedialog
 from PIL import ImageTk,Image  ## show png, jpg, for python3: pip install pillow
 from pathlib import Path
-
+from docx import Document ## show docx documents
 
 from PatentGoogleScraper import PatentGoogleScrape
 
+##TODO include pdf option: if no images, then download pdf and display instead
+## otherweise, download pdf if activated and display as third tab next to description and claims
+## when checking folder, also check for pdf and run pdf download instead, if selected
+
+##TODO logging
 
 class GUIBescheid(Tk):
     '''make GUI to compare patents'''
     def __init__(self):
         '''maximize window'''
-        #TODO: maximize
+        ##TODO: actually maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
-        root.resizable(True, True) #TODO also resize content?
+        root.resizable(True, True) ##TODO also resize content? or scroll barss
         '''make title'''
-        root.title("Compare Patents") #TODO:better title
+        root.title("Compare Patents") ##TODO:better title
 
         #############################
         '''make menu'''
@@ -28,11 +33,10 @@ class GUIBescheid(Tk):
             self.w=PopupPatentEntry(root)
             root.wait_window(self.w.top)
             self.UserPatent = self.w.value
-            print(self.UserPatent)
             TabPriorArt(TabControlPA,self.UserPatent)
 
         def About():
-            #TODO still useless
+            ##TODO still useless
             print("Test")
 
         menu = Menu(root,tearoff=0)
@@ -52,19 +56,24 @@ class GUIBescheid(Tk):
         content.grid(column=0, row=0)
 
         #############################
-        '''make application part (left side)'''
+        '''make application part (left hand side)'''
+        ##TODO: show name/Aktenzeichen
+        # ApplName = ttk.Label(content, text="Name of patent",anchor=NW)
+        # ApplName.grid(column=0,row=0)
+
         ApplFig = ttk.Frame(content)
-        ApplFig.grid(column=0,row=0,pady=(22,0)) #TODO hardcoded heigth of TabControlPA
+        ApplFig.grid(column=0,row=0,pady=(22,0)) ##TODO hardcoded heigth of TabControlPA
+        # ApplFig.grid(column=0,row=1)
         '''Appl: insert figure(s)'''
         LoadImage(root,ApplFig,"sample-picture1.jpg")
-        #self.OpenImage(ApplFig,"sample-picture1.jpg")
         '''Appl: insert description'''
         ApplDesc = HTMLScrolledText(content, html=open("desc.html", 'r', encoding='utf8').read())
         ApplDesc.grid(column=0, row=1)
+        # ApplDesc.grid(column=0, row=2)
         #############################
 
         #############################
-        '''make prior art part (right side) using tabs'''
+        '''make prior art part (right hand side) using tabs'''
         TabControlPA = ttk.Notebook(content)
         TabControlPA.grid(column=1, row=0, rowspan = 2)
 
@@ -82,18 +91,6 @@ class GUIBescheid(Tk):
         #############################
 
 
-    def OpenImage(self,frame,PathToImage):
-        '''load, resize and render'''
-        imgload = Image.open(PathToImage)
-        imgload.thumbnail((880, 380), Image.ANTIALIAS)
-        imgrender = ImageTk.PhotoImage(imgload)
-        '''add rendered image as label'''
-        img = ttk.Label(frame, image = imgrender)
-        '''save rendered image so that it survives the garbage collector'''
-        img.image = imgrender
-        '''positioning'''
-        img.grid(column=0,row=0)
-
 
 class PopupPatentEntry(object):
     def __init__(self,parent):
@@ -109,7 +106,7 @@ class PopupPatentEntry(object):
         self.userpath = ttk.Entry(self.top)
         self.userpath.pack()
         # self.userpath = filedialog.askdirectory()
-        #TODO Pfad auswählen klappt noch nicht. Eingegebener Pfad wird derzeit noch ignoriert.
+        ##TODO Pfad auswählen klappt noch nicht. Eingegebener Pfad wird derzeit noch ignoriert.
 
         self.bttnDone = Button(self.top,text='Ok',command=self.cleanup)
         self.bttnDone.pack()
@@ -155,6 +152,7 @@ class PatentFigures(ttk.Frame):
         self.DFig = ttk.Frame(parent)
         self.DFig.grid(column=0,row=0)
 
+        ##TODO might make a better gallery with https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/ttk-Label.html -> change state of label to display a different image. Probably doesn't work because we will lose zooming.
         '''container for image frames'''
         self.container = ttk.Frame(self.DFig)
         self.container.pack(side="top", fill="both", expand=True)
@@ -178,7 +176,7 @@ class PatentFigures(ttk.Frame):
             self.show_frame(0)
         except:
             pass
-            #TODO: make empty frame the size of the other frames
+            ##TODO: download and show pdf
 
 
     def show_frame(self, FrameNumber):
@@ -191,7 +189,6 @@ class FigsBttns(ttk.Frame):
         ttk.Frame.__init__(self, parent)
         self.controller = controller
         LoadImage(root,self,currentImage)
-        # self.OpenImage(DFig,ListofFigures[0])
 
         '''make buttons'''
         self.prevBtn = ttk.Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
@@ -213,8 +210,7 @@ class FigsBttns(ttk.Frame):
 
 class LoadImage(ttk.Frame):
     def __init__(self,root,parent,PathToImage):
-        # TODO: zoomen nicht ins thumbnail
-        # TODO: hardcoded sizes
+        ## TODO: hardcoded sizes
         self.canvas = Canvas(parent,width=500,height=380)
         self.canvas.grid(column=0,row=0,columnspan=2)
         self.orig_img = Image.open(PathToImage)

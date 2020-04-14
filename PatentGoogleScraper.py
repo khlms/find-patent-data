@@ -10,6 +10,8 @@ from urllib.error import HTTPError
 from pathlib import Path
 import cv2 #convert png to jpg for gui
 
+##TODO include pdf option
+
 
 def PatentGoogleScrape(patent, UserPath=Path.cwd() / "patents"):
     '''Looks up a patent on patents.google.com via its patent number'''
@@ -44,11 +46,6 @@ def PatentGoogleScrape(patent, UserPath=Path.cwd() / "patents"):
             PatentPage = requests.get(url)
             PatentSoup = BeautifulSoup(PatentPage.content, 'lxml')
 
-        # print(LangOrig)
-        #
-        # PatentPage = PatentPageOrig
-        # PatentSoup = PatentSoupOrig
-        # else:
         PathToPatent.mkdir(parents=True)
         print("Directory " + patent + " created.")
         print(PathToPatent)
@@ -83,7 +80,7 @@ def PatentGoogleScrape(patent, UserPath=Path.cwd() / "patents"):
         claims = PatentSoup.find("section",{"itemprop":"claims"})
         with open(PathToPatent / str(patent + "-claims.html"), "w", encoding=enc) as html_file:
             html_file.write(str(claims))
-        #
+
         try:
             PicturesAll = PatentSoup.find_all("li",{"itemprop":"images"})
             PicturesURLs = [picture.find("meta",{"itemprop":"full"}).get("content") for picture in PicturesAll]
@@ -97,7 +94,7 @@ def PatentGoogleScrape(patent, UserPath=Path.cwd() / "patents"):
             print(err)
         except HTTPError as err:
             print(err)
-        #
+
         description = PatentSoup.find("section",{"itemprop":"description"})
         with open(PathToPatent / str(patent + "-description.html"), "w", encoding=enc) as html_file:
             html_file.write(str(description))
