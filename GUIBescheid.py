@@ -6,9 +6,10 @@ from tkhtmlview import HTMLScrolledText ## insert HTML
 from tkinter import filedialog
 from PIL import ImageTk,Image  ## show png, jpg, for python3: pip install pillow
 from pathlib import Path
-# from docx import Document ## show docx documents
 import mammoth ## convert docx to html
-from tkdocviewer import * ## show pdf documents. Needs ghostscript
+# from tkdocviewer import * ## show pdf documents. Needs ghostscript
+from pdf2image import convert_from_path
+
 
 from PatentGoogleScraper import PatentGoogleScrape
 
@@ -21,7 +22,7 @@ from PatentGoogleScraper import PatentGoogleScrape
 class GUIBescheid(Tk):
     '''make GUI to compare patents'''
     def __init__(self):
-        '''maximize window'''
+        # maximize window
         ##TODO: actually maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
         root.geometry("%dx%d+0+0" % (w, h))
@@ -35,7 +36,7 @@ class GUIBescheid(Tk):
             self.w=PopupPatentEntry(root)
             root.wait_window(self.w.top)
             self.UserPatent = self.w.value
-            TabPriorArt(TabControlPA,self.UserPatent)
+            TabPriorArt(TabControlPA,self.UserPatent,w/2,5/12*h)
 
         def About():
             ##TODO still useless
@@ -62,18 +63,22 @@ class GUIBescheid(Tk):
         #############################
         '''make application part (left hand side)'''
         ##TODO: show name/Aktenzeichen
-        ApplName = ttk.Label(content, text="Name of patent")
-        ApplName.grid(column=0,row=0,sticky = W)
+        # ApplName = ttk.Label(content, text="Name of patent")
+        ApplName = ttk.Label(content,text = "Name of patent")
+        ApplName.grid(column=0,row=0,sticky = N+W)
 
         '''Appl: insert figure(s) via pdf'''
         # ApplFig = ttk.Frame(content)
         # ApplFig.grid(column=0,row=0,pady=(22,0)) ##TODO hardcoded heigth of TabControlPA
         # # ApplFig.grid(column=0,row=1)
         # LoadImage(root,ApplFig,"sample-picture1.jpg")
-        ApplFig = DocViewer(content, use_ttk=True)
-        ApplFig.grid(column=0,row=1,sticky = N+S+E+W)
-        # ApplFig.grid(column=0,row=0,pady=(22,0))
-        ApplFig.display_file("samplepdf.pdf")
+
+        # ApplFig = DocViewer(content, use_ttk=True)
+        # ApplFig.grid(column=0,row=1,sticky = N+S+E+W)
+        # # ApplFig.grid(column=0,row=0,pady=(22,0))
+        # ApplFig.display_file("samplepdf.pdf")
+
+        ApplFigures(root,content,"samplepdf.pdf",w/2,5/12*h)
 
         '''Appl: insert description'''
         with open("sampleantext.docx", "rb") as docx_file:
@@ -90,7 +95,7 @@ class GUIBescheid(Tk):
         TabControlPA.grid(column=1, row=0, rowspan=3, sticky = N+E+S+W)
 
         '''the function AddPriorArt adds tabs using the class TabsPriorArt here'''
-        TabPriorArt(TabControlPA,"US10397476B2")
+        TabPriorArt(TabControlPA,"US10397476B2",w/2,5/12*h)
         #############################
 
         '''search field'''
@@ -130,9 +135,11 @@ class PopupPatentEntry(object):
 
 class TabPriorArt(ttk.Frame):
     '''generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)'''
-    def __init__(self,notebook,PatentNumber, PathToFiles = ""):
+    def __init__(self,notebook,PatentNumber ,maxwidth,maxheight, PathToFiles = ""):
+        ## TODO include root in options
         self.tabD = ttk.Frame(notebook)
-        self.tabD.grid(column=0,row=0)
+        self.tabD.grid(column=0,row=0, sticky = N+S+E+W)
+        # self.TabD.
         notebook.add(self.tabD, text=PatentNumber)
 
         '''download patent'''
@@ -144,7 +151,7 @@ class TabPriorArt(ttk.Frame):
             PathToFiles = PathToFiles / PatentNumber
 
         '''insert images'''
-        PatentFigures(root,self.tabD,PathToFiles)
+        PriorArtFigures(root,self.tabD,PathToFiles,maxwidth,maxheight)
 
         '''insert tabs for description/claims (html)'''
         self.TabText = ttk.Notebook(self.tabD)
@@ -159,8 +166,8 @@ class TabPriorArt(ttk.Frame):
         self.TabText.add(self.DClaims, text="Claims")
 
 
-class PatentFigures(ttk.Frame):
-    def __init__(self,root,parent,PathToFiles):
+class PriorArtFigures(ttk.Frame):
+    def __init__(self,root,parent,PathToFiles,maxwidth,maxheight):
         self.DFig = ttk.Frame(parent)
         self.DFig.grid(column=0,row=0)
 
@@ -168,19 +175,23 @@ class PatentFigures(ttk.Frame):
         '''container for image frames'''
         self.container = ttk.Frame(self.DFig)
         self.container.pack(side="top", fill="both", expand=True)
-        self.container.grid_rowconfigure(0, weight=1)
-        self.container.grid_columnconfigure(0, weight=1)
+        # self.container.grid_rowconfigure(0, weight=1)
+        # self.container.grid_columnconfigure(0, weight=1)
 
         '''list of figures'''
         self.ListofFigures = []
         for currentFile in PathToFiles.glob("*.jpg"):
             self.ListofFigures.append(currentFile)
+        try:
+            del(self.ListofFigures[0])
+        except:
+            pass
         self.ListofFigures.append("None")
         self.ListofFigures.insert(0,"None")
 
         self.ListofFrames = []
         for i in range(len(self.ListofFigures)-2):
-            self.TempFrame = FigsBttns(root,self.container,self,i,len(self.ListofFigures)-2,self.ListofFigures[i+1])
+            self.TempFrame = PriorArtFigsBttns(root,self.container,self,i,len(self.ListofFigures)-2,self.ListofFigures[i+1],maxwidth,maxheight)
             self.ListofFrames.append(self.TempFrame)
             self.TempFrame.grid(row=0, column=0, sticky="nsew")
 
@@ -196,11 +207,11 @@ class PatentFigures(ttk.Frame):
             frame = self.ListofFrames[FrameNumber]
             frame.tkraise()
 
-class FigsBttns(ttk.Frame):
-    def __init__(self,root,parent,controller,indexInt,maxInt,currentImage):
+class PriorArtFigsBttns(ttk.Frame):
+    def __init__(self,root,parent,controller,indexInt,maxInt,currentImage,maxwidth,maxheight):
         ttk.Frame.__init__(self, parent)
         self.controller = controller
-        LoadImage(root,self,currentImage)
+        LoadImage(root,self,currentImage,maxwidth,maxheight,2)
 
         '''make buttons'''
         self.prevBtn = ttk.Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
@@ -210,25 +221,31 @@ class FigsBttns(ttk.Frame):
 
         if indexInt == 0:
             self.prevBtn['state'] = 'disabled'
-            self.nextBtn['state'] = 'normal'
-        elif indexInt < maxInt-1:
+        else:
             self.prevBtn['state'] = 'normal'
-            self.nextBtn['state'] = 'normal'
-        elif indexInt == maxInt -1:
-            self.prevBtn['state'] = 'normal'
+        if indexInt == maxInt -1:
             self.nextBtn['state'] = 'disabled'
+        else:
+            self.nextBtn['state'] = 'normal<'
+
 
 
 
 class LoadImage(ttk.Frame):
-    def __init__(self,root,parent,PathToImage):
+    def __init__(self,root,parent,PathToImage,maxwidth,maxheight,ColumnCount):
         ## TODO: hardcoded sizes
-        self.canvas = Canvas(parent,width=500,height=380)
-        self.canvas.grid(column=0,row=0,columnspan=2)
-        self.orig_img = Image.open(PathToImage)
-        self.orig_img.thumbnail((500, 380), Image.ANTIALIAS)
-        self.img = ImageTk.PhotoImage(self.orig_img)
-        self.canvas.create_image(0,0,image=self.img, anchor="nw")
+        self.canvas = Canvas(parent,width=maxwidth,height=maxheight)
+        self.canvas.grid(column=0,row=0,columnspan=ColumnCount)
+        try:
+            self.orig_img = Image.open(PathToImage)
+            self.orig_img.thumbnail((maxwidth, maxheight), Image.ANTIALIAS)
+            self.img = ImageTk.PhotoImage(self.orig_img)
+        except:
+            self.orig_img = PathToImage
+            self.orig_img.thumbnail((maxwidth,maxheight), Image.ANTIALIAS)
+            self.img = ImageTk.PhotoImage(self.orig_img)
+        self.canvas.create_image(maxwidth/2,maxheight/2,image=self.img, anchor=CENTER)
+
 
         self.zoomcycle = 0
         self.zimg_id = None
@@ -260,6 +277,87 @@ class LoadImage(ttk.Frame):
             size = 600,400
             self.zimg = ImageTk.PhotoImage(tmp.resize(size))
             self.zimg_id = self.canvas.create_image(event.x,event.y,image=self.zimg)
+
+
+
+
+class ApplFigures(ttk.Frame):
+    def __init__(self,root,parent,PathToPDF,maxwidth,maxheight):
+        self.ApplFig = ttk.Frame(parent)
+        self.ApplFig.grid(column=0,row=1)
+
+        ##TODO might make a better gallery with https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/ttk-Label.html -> change state of label to display a different image. Probably doesn't work because we will lose zooming.
+        '''container for image frames'''
+        self.container = ttk.Frame(self.ApplFig)
+        self.container.pack(side="top", fill="both", expand=True)
+        # self.container.grid_rowconfigure(0, weight=1)
+        # self.container.grid_columnconfigure(0, weight=1)
+
+        '''list of figures'''
+        self.ListofFigures = []
+        # self.ApplPages = convert_from_path(PathToPDF,size=(maxwidth,maxheight))
+        self.ApplPages = convert_from_path(PathToPDF)
+        for currentFile in self.ApplPages:
+            self.ListofFigures.append(currentFile)
+        self.ListofFigures.append("None")
+        self.ListofFigures.insert(0,"None")
+
+        self.ListofFrames = []
+        for i in range(len(self.ListofFigures)-2):
+            self.TempFrame = ApplFigsBttns(root,self.container,self,i,len(self.ListofFigures)-2,self.ListofFigures[i+1],maxwidth,maxheight)
+            self.ListofFrames.append(self.TempFrame)
+            self.TempFrame.grid(row=0, column=0, sticky="nsew")
+
+        try:
+            self.show_frame(0)
+        except:
+            pass
+
+
+    def show_frame(self, FrameNumber):
+            '''Show a frame for the given page name'''
+            frame = self.ListofFrames[FrameNumber]
+            frame.tkraise()
+
+
+class ApplFigsBttns(ttk.Frame):
+    def __init__(self,root,parent,controller,indexInt,maxInt,currentImage,maxwidth,maxheight):
+        ttk.Frame.__init__(self, parent)
+        self.controller = controller
+        LoadImage(root,self,currentImage,maxwidth,maxheight,4)
+
+        '''make buttons'''
+        self.prevBtn = ttk.Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
+        self.prevBtn.grid(column=0,row=1)
+
+        self.OutOfLbl = ttk.Entry(self)
+        self.OutOfLbl.insert(0,str(indexInt+1))
+        self.OutOfLbl.grid(column=1,row=1)
+        root.bind('<Return>',self.onReturn()) ##TODO happens on startup but not on return
+        self.OutOfLbl2 = ttk.Label(self, text= str( "/" + str(maxInt)))
+        self.OutOfLbl2.grid(column=2,row=1)
+
+        self.nextBtn = ttk.Button(self, text="next", command=lambda: self.controller.show_frame(indexInt+1))
+        self.nextBtn.grid(column=3,row=1)
+
+        if indexInt == 0:
+            self.prevBtn['state'] = 'disabled'
+        else:
+            self.prevBtn['state'] = 'normal'
+        if indexInt == maxInt -1:
+            self.nextBtn['state'] = 'disabled'
+        else:
+            self.nextBtn['state'] = 'normal'
+
+    def onReturn(self):
+        self.newFig = self.OutOfLbl.get()
+        try:
+            self.controller.show_frame(int(self.newFig)-1)
+        except:
+            print(self.newFig)
+        ## TODO doesn't work yet. Pressing return doesn't do anything
+
+
 
 
 if __name__ == '__main__':
