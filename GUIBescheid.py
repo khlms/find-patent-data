@@ -6,7 +6,9 @@ from tkhtmlview import HTMLScrolledText ## insert HTML
 from tkinter import filedialog
 from PIL import ImageTk,Image  ## show png, jpg, for python3: pip install pillow
 from pathlib import Path
-from docx import Document ## show docx documents
+# from docx import Document ## show docx documents
+import mammoth ## convert docx to html
+from tkdocviewer import * ## show pdf documents. Needs ghostscript
 
 from PatentGoogleScraper import PatentGoogleScrape
 
@@ -53,31 +55,41 @@ class GUIBescheid(Tk):
 
         '''make content frame'''
         content = ttk.Frame(root)
-        content.grid(column=0, row=0)
+        content.grid(column=0, row=0, sticky=N+E+S+W)
+        content.grid_columnconfigure(0,weight=1)
+        content.grid_columnconfigure(1,weight=1)
 
         #############################
         '''make application part (left hand side)'''
         ##TODO: show name/Aktenzeichen
-        # ApplName = ttk.Label(content, text="Name of patent",anchor=NW)
-        # ApplName.grid(column=0,row=0)
+        ApplName = ttk.Label(content, text="Name of patent")
+        ApplName.grid(column=0,row=0,sticky = W)
 
-        ApplFig = ttk.Frame(content)
-        ApplFig.grid(column=0,row=0,pady=(22,0)) ##TODO hardcoded heigth of TabControlPA
-        # ApplFig.grid(column=0,row=1)
-        '''Appl: insert figure(s)'''
-        LoadImage(root,ApplFig,"sample-picture1.jpg")
+        '''Appl: insert figure(s) via pdf'''
+        # ApplFig = ttk.Frame(content)
+        # ApplFig.grid(column=0,row=0,pady=(22,0)) ##TODO hardcoded heigth of TabControlPA
+        # # ApplFig.grid(column=0,row=1)
+        # LoadImage(root,ApplFig,"sample-picture1.jpg")
+        ApplFig = DocViewer(content, use_ttk=True)
+        ApplFig.grid(column=0,row=1,sticky = N+S+E+W)
+        # ApplFig.grid(column=0,row=0,pady=(22,0))
+        ApplFig.display_file("samplepdf.pdf")
+
         '''Appl: insert description'''
-        ApplDesc = HTMLScrolledText(content, html=open("desc.html", 'r', encoding='utf8').read())
-        ApplDesc.grid(column=0, row=1)
+        with open("sampleantext.docx", "rb") as docx_file:
+            htmlResult = mammoth.convert_to_html(docx_file)
+            htmlDoc = htmlResult.value
+        ApplDesc = HTMLScrolledText(content, html=htmlDoc)
+        ApplDesc.grid(column=0, row=2, sticky = N+E+S+W)
         # ApplDesc.grid(column=0, row=2)
         #############################
 
         #############################
         '''make prior art part (right hand side) using tabs'''
         TabControlPA = ttk.Notebook(content)
-        TabControlPA.grid(column=1, row=0, rowspan = 2)
+        TabControlPA.grid(column=1, row=0, rowspan=3, sticky = N+E+S+W)
 
-        TabPriorArt(TabControlPA,"US20190313022A1")
+        '''the function AddPriorArt adds tabs using the class TabsPriorArt here'''
         TabPriorArt(TabControlPA,"US10397476B2")
         #############################
 
