@@ -78,7 +78,7 @@ class GUIBescheid(Tk):
         # # ApplFig.grid(column=0,row=0,pady=(22,0))
         # ApplFig.display_file("samplepdf.pdf")
 
-        ApplFigures(root,content,"samplepdf.pdf",w/2,5/12*h)
+        Figures(root,content,Path("samplepdf.pdf"),w/2,5/12*h,1)
 
         '''Appl: insert description'''
         with open("sampleantext.docx", "rb") as docx_file:
@@ -151,7 +151,8 @@ class TabPriorArt(ttk.Frame):
             PathToFiles = PathToFiles / PatentNumber
 
         '''insert images'''
-        PriorArtFigures(root,self.tabD,PathToFiles,maxwidth,maxheight)
+        # PriorArtFigures(root,self.tabD,PathToFiles,maxwidth,maxheight)
+        Figures(root,self.tabD,PathToFiles,maxwidth,maxheight,0)
 
         '''insert tabs for description/claims (html)'''
         self.TabText = ttk.Notebook(self.tabD)
@@ -164,71 +165,6 @@ class TabPriorArt(ttk.Frame):
         self.DClaims = HTMLScrolledText(self.TabText, html=open(PathToFiles / (PatentNumber + "-claims.html"), 'r', encoding='utf8').read())
         self.DClaims.grid()
         self.TabText.add(self.DClaims, text="Claims")
-
-
-class PriorArtFigures(ttk.Frame):
-    def __init__(self,root,parent,PathToFiles,maxwidth,maxheight):
-        self.DFig = ttk.Frame(parent)
-        self.DFig.grid(column=0,row=0)
-
-        ##TODO might make a better gallery with https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/ttk-Label.html -> change state of label to display a different image. Probably doesn't work because we will lose zooming.
-        '''container for image frames'''
-        self.container = ttk.Frame(self.DFig)
-        self.container.pack(side="top", fill="both", expand=True)
-        # self.container.grid_rowconfigure(0, weight=1)
-        # self.container.grid_columnconfigure(0, weight=1)
-
-        '''list of figures'''
-        self.ListofFigures = []
-        for currentFile in PathToFiles.glob("*.jpg"):
-            self.ListofFigures.append(currentFile)
-        try:
-            del(self.ListofFigures[0])
-        except:
-            pass
-        self.ListofFigures.append("None")
-        self.ListofFigures.insert(0,"None")
-
-        self.ListofFrames = []
-        for i in range(len(self.ListofFigures)-2):
-            self.TempFrame = PriorArtFigsBttns(root,self.container,self,i,len(self.ListofFigures)-2,self.ListofFigures[i+1],maxwidth,maxheight)
-            self.ListofFrames.append(self.TempFrame)
-            self.TempFrame.grid(row=0, column=0, sticky="nsew")
-
-        try:
-            self.show_frame(0)
-        except:
-            pass
-            ##TODO: download and show pdf
-
-
-    def show_frame(self, FrameNumber):
-            '''Show a frame for the given page name'''
-            frame = self.ListofFrames[FrameNumber]
-            frame.tkraise()
-
-class PriorArtFigsBttns(ttk.Frame):
-    def __init__(self,root,parent,controller,indexInt,maxInt,currentImage,maxwidth,maxheight):
-        ttk.Frame.__init__(self, parent)
-        self.controller = controller
-        LoadImage(root,self,currentImage,maxwidth,maxheight,2)
-
-        '''make buttons'''
-        self.prevBtn = ttk.Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
-        self.prevBtn.grid(column=0,row=1)
-        self.nextBtn = ttk.Button(self, text="next", command=lambda: self.controller.show_frame(indexInt+1))
-        self.nextBtn.grid(column=1,row=1)
-
-        if indexInt == 0:
-            self.prevBtn['state'] = 'disabled'
-        else:
-            self.prevBtn['state'] = 'normal'
-        if indexInt == maxInt -1:
-            self.nextBtn['state'] = 'disabled'
-        else:
-            self.nextBtn['state'] = 'normal<'
-
-
 
 
 class LoadImage(ttk.Frame):
@@ -281,30 +217,38 @@ class LoadImage(ttk.Frame):
 
 
 
-class ApplFigures(ttk.Frame):
-    def __init__(self,root,parent,PathToPDF,maxwidth,maxheight):
-        self.ApplFig = ttk.Frame(parent)
-        self.ApplFig.grid(column=0,row=1)
+class Figures(ttk.Frame):
+    def __init__(self,root,parent,PathToFile,maxwidth,maxheight,rownumber):
+        self.PatentFig = ttk.Frame(parent)
+        self.PatentFig.grid(column=0,row=rownumber)
 
         ##TODO might make a better gallery with https://anzeljg.github.io/rin2/book2/2405/docs/tkinter/ttk-Label.html -> change state of label to display a different image. Probably doesn't work because we will lose zooming.
         '''container for image frames'''
-        self.container = ttk.Frame(self.ApplFig)
+        self.container = ttk.Frame(self.PatentFig)
         self.container.pack(side="top", fill="both", expand=True)
         # self.container.grid_rowconfigure(0, weight=1)
         # self.container.grid_columnconfigure(0, weight=1)
 
         '''list of figures'''
         self.ListofFigures = []
-        # self.ApplPages = convert_from_path(PathToPDF,size=(maxwidth,maxheight))
-        self.ApplPages = convert_from_path(PathToPDF)
-        for currentFile in self.ApplPages:
-            self.ListofFigures.append(currentFile)
+        if Path.is_dir(PathToFile):
+            for currentFile in PathToFile.glob("*.jpg"):
+                self.ListofFigures.append(currentFile)
+            try:
+                del(self.ListofFigures[0])
+            except:
+                pass
+        elif Path.is_file(PathToFile):
+            self.ApplPages = convert_from_path(PathToFile)
+            for currentFile in self.ApplPages:
+                self.ListofFigures.append(currentFile)
+
         self.ListofFigures.append("None")
         self.ListofFigures.insert(0,"None")
 
         self.ListofFrames = []
         for i in range(len(self.ListofFigures)-2):
-            self.TempFrame = ApplFigsBttns(root,self.container,self,i,len(self.ListofFigures)-2,self.ListofFigures[i+1],maxwidth,maxheight)
+            self.TempFrame = FigsBttns(root,self.container,self,i,len(self.ListofFigures)-2,self.ListofFigures[i+1],maxwidth,maxheight)
             self.ListofFrames.append(self.TempFrame)
             self.TempFrame.grid(row=0, column=0, sticky="nsew")
 
@@ -320,7 +264,7 @@ class ApplFigures(ttk.Frame):
             frame.tkraise()
 
 
-class ApplFigsBttns(ttk.Frame):
+class FigsBttns(ttk.Frame):
     def __init__(self,root,parent,controller,indexInt,maxInt,currentImage,maxwidth,maxheight):
         ttk.Frame.__init__(self, parent)
         self.controller = controller
@@ -330,12 +274,13 @@ class ApplFigsBttns(ttk.Frame):
         self.prevBtn = ttk.Button(self, text="previous", command=lambda: self.controller.show_frame(indexInt-1))
         self.prevBtn.grid(column=0,row=1)
 
-        self.OutOfLbl = ttk.Entry(self)
-        self.OutOfLbl.insert(0,str(indexInt+1))
-        self.OutOfLbl.grid(column=1,row=1)
-        root.bind('<Return>',self.onReturn()) ##TODO happens on startup but not on return
-        self.OutOfLbl2 = ttk.Label(self, text= str( "/" + str(maxInt)))
-        self.OutOfLbl2.grid(column=2,row=1)
+        self.PageLbl = ttk.Entry(self, width=5)
+        self.PageLbl.insert(0,str(indexInt+1))
+        self.PageLbl.grid(column=1,row=1, sticky=E)
+        self.PageLbl.bind('<Return>', (lambda event: self.onReturn(self.PageLbl.get(),indexInt,maxInt)))
+
+        self.OutOfLbl = ttk.Label(self, text= str( "/" + str(maxInt)))
+        self.OutOfLbl.grid(column=2,row=1, sticky=W)
 
         self.nextBtn = ttk.Button(self, text="next", command=lambda: self.controller.show_frame(indexInt+1))
         self.nextBtn.grid(column=3,row=1)
@@ -349,13 +294,18 @@ class ApplFigsBttns(ttk.Frame):
         else:
             self.nextBtn['state'] = 'normal'
 
-    def onReturn(self):
-        self.newFig = self.OutOfLbl.get()
+    def onReturn(self,UserPage,indexInt, maxInt):
         try:
-            self.controller.show_frame(int(self.newFig)-1)
+            indexUserPage = int(UserPage) -1
+            if indexUserPage >= 0 and indexUserPage <= maxInt:
+                self.controller.show_frame(indexUserPage)
+            else:
+                self.Pagebl.delete(0,END)
+                self.PageLbl.insert(0,str(indexInt+1))
         except:
-            print(self.newFig)
-        ## TODO doesn't work yet. Pressing return doesn't do anything
+            self.PageLbl.delete(0,END)
+            self.PageLbl.insert(0,str(indexInt+1))
+
 
 
 
