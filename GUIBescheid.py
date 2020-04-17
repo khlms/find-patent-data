@@ -3,12 +3,11 @@
 from tkinter import *
 from tkinter import ttk
 from tkhtmlview import HTMLScrolledText ## insert HTML
-from tkinter import filedialog
 from PIL import ImageTk,Image  ## show png, jpg, for python3: pip install pillow
 from pathlib import Path
 import mammoth ## convert docx to html
-# from tkdocviewer import * ## show pdf documents. Needs ghostscript
-from pdf2image import convert_from_path
+from pdf2image import convert_from_path # pdf to imagea
+from tkinter import filedialog
 
 
 from PatentGoogleScraper import PatentGoogleScrape
@@ -19,9 +18,24 @@ from PatentGoogleScraper import PatentGoogleScrape
 
 ##TODO logging
 
+##if PatentGoogleScraper raises exception, then pass on tab
+
+
 class GUIBescheid(Tk):
     '''make GUI to compare patents'''
-    def __init__(self):
+    ''' akte = [string(Aktenzeichen), Path(PDF file for images), Path(DOCX file for description/claims)] '''
+    ''' (optional) compPatents =string or list of strings of patents names to compare to '''
+    def __init__(self,akte=None, compPatents = []):
+        if akte==None:
+            root.withdraw()
+            self.ww = PopupGUIInput(root)
+            root.wait_window(self.ww.InsertAppl)
+            akte = self.ww.akte
+            try:
+                compPatents.extend(self.ww.compPatents)
+            except:
+                pass
+            root.deiconify()
         # maximize window
         ##TODO: actually maximize
         w, h = root.winfo_screenwidth(), root.winfo_screenheight()
@@ -36,7 +50,7 @@ class GUIBescheid(Tk):
             self.w=PopupPatentEntry(root)
             root.wait_window(self.w.top)
             self.UserPatent = self.w.value
-            TabPriorArt(TabControlPA,self.UserPatent,w/2,5/12*h)
+            TabPriorArt(root,TabControlPA,self.UserPatent,w/2,5/12*h)
 
         def About():
             ##TODO still useless
@@ -62,31 +76,7 @@ class GUIBescheid(Tk):
 
         #############################
         '''make application part (left hand side)'''
-        ##TODO: show name/Aktenzeichen
-        # ApplName = ttk.Label(content, text="Name of patent")
-        ApplName = ttk.Label(content,text = "Name of patent")
-        ApplName.grid(column=0,row=0,sticky = N+W)
-
-        '''Appl: insert figure(s) via pdf'''
-        # ApplFig = ttk.Frame(content)
-        # ApplFig.grid(column=0,row=0,pady=(22,0)) ##TODO hardcoded heigth of TabControlPA
-        # # ApplFig.grid(column=0,row=1)
-        # LoadImage(root,ApplFig,"sample-picture1.jpg")
-
-        # ApplFig = DocViewer(content, use_ttk=True)
-        # ApplFig.grid(column=0,row=1,sticky = N+S+E+W)
-        # # ApplFig.grid(column=0,row=0,pady=(22,0))
-        # ApplFig.display_file("samplepdf.pdf")
-
-        Figures(root,content,Path("samplepdf.pdf"),w/2,5/12*h,1)
-
-        '''Appl: insert description'''
-        with open("sampleantext.docx", "rb") as docx_file:
-            htmlResult = mammoth.convert_to_html(docx_file)
-            htmlDoc = htmlResult.value
-        ApplDesc = HTMLScrolledText(content, html=htmlDoc)
-        ApplDesc.grid(column=0, row=2, sticky = N+E+S+W)
-        # ApplDesc.grid(column=0, row=2)
+        Application(root,content,akte,w/2,5/12*h)
         #############################
 
         #############################
@@ -95,24 +85,74 @@ class GUIBescheid(Tk):
         TabControlPA.grid(column=1, row=0, rowspan=3, sticky = N+E+S+W)
 
         '''the function AddPriorArt adds tabs using the class TabsPriorArt here'''
-        TabPriorArt(TabControlPA,"US10397476B2",w/2,5/12*h)
+        for patentString in compPatents:
+            try:
+                TabPriorArt(root,TabControlPA,str(patentString),w/2,5/12*h)
+            except FileNotFoundError:
+                pass
         #############################
 
-        '''search field'''
-        EntrySearch = ttk.Entry(content)
-        ButtonSearch = ttk.Button(content, text="Suchen")
+        # root.mainloop()
 
-        #############################
-        #EntrySearch.grid(column=0, row=0, rowspan=2)
-        #ButtonSearch.grid(column=0, row=1)
-        #############################
+
+
+class PopupGUIInput(Toplevel):
+    '''get inupt data for GUIBescheid'''
+    def __init__(self, parent):
+        self.InsertAppl = Toplevel(parent)
+        self.InsertAppl.title = "Insert patent info to compare documents"
+        # content = ttk.Frame(self.InsertAppl)
+        # content.pack()
+
+        label1 = ttk.Label(self.InsertAppl,text="Enter the Aktenzeichen:")
+        label1.pack()
+        self.userappl = ttk.Entry(self.InsertAppl)
+        self.userappl.pack()
+        self.userappl.focus()
+
+        BttnFig = ttk.Button(self.InsertAppl,text="Choose pdf file for figures", command=self.browsePDF)
+        BttnFig.pack()
+        self.LblFig = ttk.Label(self.InsertAppl,text = "Chosen PDF: None")
+        self.LblFig.pack()
+
+        BttnText = ttk.Button(self.InsertAppl,text="Choose docx file for application", command=self.browseDOCX)
+        BttnText.pack()
+        self.LblText = ttk.Label(self.InsertAppl,text = "Chosen docx: None")
+        self.LblText.pack()
+
+        label2 = ttk.Label(self.InsertAppl,text="Comma-separated list of patent numbers:")
+        label2.pack()
+        self.userpatents = ttk.Entry(self.InsertAppl)
+        self.userpatents.pack()
+
+        bttnDone = Button(self.InsertAppl,text='Ok',command=self.cleanup)
+        bttnDone.pack()
+
+
+    def browsePDF(self):
+        # Allow user to select a PDF file and store it
+        self.PDFname = filedialog.askopenfilename(filetypes = (("PDF files", "*.pdf;*.PDF"),("All files", "*.*") ))
+        self.LblFig.config(text = "Chosen PDF: " + str(self.PDFname))
+
+    def browseDOCX(self):
+        # Allow user to select a PDF file and store it
+        self.DOCXname = filedialog.askopenfilename(filetypes = (("DOCX files", "*.docx;*.DOCX"),("All files", "*.*") ))
+        self.LblText.config(text = "Chosen DOCX: " + str(self.DOCXname))
+
+
+    def cleanup(self):
+
+        self.akte=[self.userappl.get(),Path(self.PDFname),Path(self.DOCXname)]
+        self.compPatents = [pat.strip() for pat in self.userpatents.get().split(",")]
+
+        self.InsertAppl.destroy()
 
 
 
 class PopupPatentEntry(object):
     def __init__(self,parent):
         self.top = Toplevel(parent)
-        self.label1 = ttk.Label(self.top,text="Enther the patent number:")
+        self.label1 = ttk.Label(self.top,text="Enter the patent number:")
         self.label1.pack()
         self.userpatent = ttk.Entry(self.top)
         self.userpatent.pack()
@@ -133,10 +173,29 @@ class PopupPatentEntry(object):
         self.top.destroy()
 
 
+
+
+class Application():
+    def __init__(self,root,parent,akte,maxwidth,maxheight):
+        '''Appl: insert Aktenzeichen'''
+        self.ApplName = ttk.Label(parent,text = akte[0])
+        self.ApplName.grid(column=0,row=0,sticky = N+W)
+
+        '''Appl: insert figure(s) via pdf'''
+        Figures(root,parent,akte[1],maxwidth,maxheight,1)
+
+        '''Appl: insert description'''
+        with open(akte[2], "rb") as docx_file:
+            htmlResult = mammoth.convert_to_html(docx_file)
+            htmlDoc = htmlResult.value
+        self.ApplDesc = HTMLScrolledText(parent, html=htmlDoc)
+        self.ApplDesc.grid(column=0, row=2, sticky = N+E+S+W)
+
+
 class TabPriorArt(ttk.Frame):
     '''generates a new tab on the right using PatentNumber (string that identifies patent on patents.google.com, i.e. name of folder with data)'''
-    def __init__(self,notebook,PatentNumber ,maxwidth,maxheight, PathToFiles = ""):
-        ## TODO include root in options
+    def __init__(self,root,notebook,PatentNumber ,maxwidth,maxheight, PathToFiles = ""):
+        ## TODO include root in options?
         self.tabD = ttk.Frame(notebook)
         self.tabD.grid(column=0,row=0, sticky = N+S+E+W)
         # self.TabD.
@@ -151,7 +210,6 @@ class TabPriorArt(ttk.Frame):
             PathToFiles = PathToFiles / PatentNumber
 
         '''insert images'''
-        # PriorArtFigures(root,self.tabD,PathToFiles,maxwidth,maxheight)
         Figures(root,self.tabD,PathToFiles,maxwidth,maxheight,0)
 
         '''insert tabs for description/claims (html)'''
@@ -180,6 +238,7 @@ class LoadImage(ttk.Frame):
             self.orig_img = PathToImage
             self.orig_img.thumbnail((maxwidth,maxheight), Image.ANTIALIAS)
             self.img = ImageTk.PhotoImage(self.orig_img)
+        root.img = self.img
         self.canvas.create_image(maxwidth/2,maxheight/2,image=self.img, anchor=CENTER)
 
 
@@ -311,10 +370,9 @@ class FigsBttns(ttk.Frame):
 
 
 if __name__ == '__main__':
-    '''make root widget'''
     root = Tk()
-
     GUIBescheid()
-
-    '''make mainloop'''
+    # akte = ["Beispielaktenzeichen",Path("samplepdf.pdf"),Path("sampleantext.docx")]
+    # compPatents = ["US10397476B2"]
+    # GUIBescheid(akte,compPatents)
     root.mainloop()
