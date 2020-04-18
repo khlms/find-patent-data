@@ -33,8 +33,8 @@ def PatentGoogleScrape(patent, UserPath=Path.cwd() / "patents"):
         titlehtml = PatentSoupOrig.find("title").contents
         if "Error 404 (Not Found)" in titlehtml[0]:
             print("Patent " + patent + " not found.")
-            raise Exception(FileNotFoundError)
-            # return
+            # raise Exception(FileNotFoundError)
+            return
 
         '''get original language of patent'''
         LangOrig = PatentSoupOrig.find("section",{"itemprop":"application"}).find("section",{"itemprop":"metadata"}).find("span",{"itemprop":"primaryLanguage"}).contents[0]

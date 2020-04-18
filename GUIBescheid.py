@@ -50,7 +50,10 @@ class GUIBescheid(Tk):
             self.w=PopupPatentEntry(root)
             root.wait_window(self.w.top)
             self.UserPatent = self.w.value
-            TabPriorArt(root,TabControlPA,self.UserPatent,w/2,5/12*h)
+            try:
+                TabPriorArt(root,TabControlPA,self.UserPatent,w/2,5/12*h)
+            except:
+                pass
 
         def About():
             ##TODO still useless
@@ -88,7 +91,7 @@ class GUIBescheid(Tk):
         for patentString in compPatents:
             try:
                 TabPriorArt(root,TabControlPA,str(patentString),w/2,5/12*h)
-            except FileNotFoundError:
+            except:
                 pass
         #############################
 
@@ -325,7 +328,8 @@ class Figures(ttk.Frame):
 
 class FigsBttns(ttk.Frame):
     def __init__(self,root,parent,controller,indexInt,maxInt,currentImage,maxwidth,maxheight):
-        ttk.Frame.__init__(self, parent)
+        # ttk.Frame.__init__(self, parent)
+        super().__init__(parent)
         self.controller = controller
         LoadImage(root,self,currentImage,maxwidth,maxheight,4)
 
@@ -371,8 +375,8 @@ class FigsBttns(ttk.Frame):
 
 if __name__ == '__main__':
     root = Tk()
-    GUIBescheid()
-    # akte = ["Beispielaktenzeichen",Path("samplepdf.pdf"),Path("sampleantext.docx")]
-    # compPatents = ["US10397476B2"]
-    # GUIBescheid(akte,compPatents)
+    # GUIBescheid()
+    akte = ["Beispielaktenzeichen",Path("samplepdf.pdf"),Path("sampleantext.docx")]
+    compPatents = ["US10397476B2", "US7629995B2"]
+    GUIBescheid(akte,compPatents)
     root.mainloop()
